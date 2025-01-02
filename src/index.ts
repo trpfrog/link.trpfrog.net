@@ -1,9 +1,18 @@
-import { Hono } from 'hono'
+import { Hono } from "hono";
+import { z } from "zod";
+import rawURLs from "../urls.yaml";
 
-const app = new Hono()
+const urls = z.record(z.string(), z.string().url()).parse(rawURLs);
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+const app = new Hono();
 
-export default app
+app.get("/:key", (c) => {
+  const key = c.req.param("key");
+  const url = urls[key];
+  if (!url) {
+    return c.notFound();
+  }
+  return c.redirect(url);
+});
+
+export default app;

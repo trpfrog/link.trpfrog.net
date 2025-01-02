@@ -1,14 +1,23 @@
 {
   "name": "link.trpfrog.net",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify"
+    "dev": "vite dev",
+    "build": "vite build",
+    "deploy": "vite build &&& wrangler deploy --minify"
   },
   "dependencies": {
-    "hono": "^4.6.15"
+    "@hono/vite-dev-server": "^0.17.0",
+    "hono": "^4.6.15",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241218.0",
+    "@hono/vite-build": "^1.2.0",
+    "@rollup/plugin-yaml": "^4.1.2",
+    "vite": "^6.0.6",
     "wrangler": "^3.96.0"
   }
 }
