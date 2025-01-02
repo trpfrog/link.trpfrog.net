@@ -12,7 +12,9 @@ const app = new Hono<Env>().get("/:key", async (c) => {
   const key = c.req.param("key");
   const remoteYamlUri = env(c).REDIRECT_YAML_URI;
 
-  if (remoteYamlUri) {
+  let uncheckedUrl = urls[key];
+
+  if (!uncheckedUrl && remoteYamlUri) {
     const res = await fetch(remoteYamlUri, {
       cf: {
         cacheTtl: 30,
@@ -21,14 +23,13 @@ const app = new Hono<Env>().get("/:key", async (c) => {
     });
     const rawYaml = await res.text();
     const parsedUriRecord = uncheckedUrlRecordSchema.parse(yaml.parse(rawYaml));
-    Object.assign(urls, parsedUriRecord);
+    uncheckedUrl = parsedUriRecord[key];
   }
 
-  const uncheckedUrl = urls[key];
-  const url = z.string().url().parse(uncheckedUrl);
-  if (!url) {
+  if (!uncheckedUrl) {
     return c.notFound();
   }
+  const url = z.string().url().parse(uncheckedUrl);
   return c.redirect(url);
 });
 
