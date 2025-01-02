@@ -5,8 +5,8 @@ import * as yaml from "yaml";
 import { Env } from "./env";
 import { env } from "hono/adapter";
 
-const urlRecordSchema = z.record(z.string().url());
-const urls = urlRecordSchema.parse(rawURLs);
+const uncheckedUrlRecordSchema = z.record(z.string());
+const urls = uncheckedUrlRecordSchema.parse(rawURLs);
 
 const app = new Hono<Env>().get("/:key", async (c) => {
   const key = c.req.param("key");
@@ -20,11 +20,12 @@ const app = new Hono<Env>().get("/:key", async (c) => {
       },
     });
     const rawYaml = await res.text();
-    const parsedUriRecord = urlRecordSchema.parse(yaml.parse(rawYaml));
+    const parsedUriRecord = uncheckedUrlRecordSchema.parse(yaml.parse(rawYaml));
     Object.assign(urls, parsedUriRecord);
   }
 
-  const url = urls[key];
+  const uncheckedUrl = urls[key];
+  const url = z.string().url().parse(uncheckedUrl);
   if (!url) {
     return c.notFound();
   }
